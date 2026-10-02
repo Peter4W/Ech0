@@ -1,0 +1,29 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# top 模块单镜像编排：一个容器同时运行 Ech0 本体 + 置顶边车。
+# 使用：docker compose -f top/docker-compose.yml up -d --build
+
+services:
+  ech0:
+    build:
+      context: ..
+      dockerfile: top/ech0-full.Dockerfile
+    image: ech0:full
+    environment:
+      # 生产环境请替换为强随机字符串（ech0 自动读取）
+      JWT_SECRET: "change-me-to-a-random-secret"
+      # 边车配置（默认即可，回源走容器内部回环）
+      TOP_ADDR: ":6278"
+      TOP_UPSTREAM: "http://127.0.0.1:6277"
+      TOP_DATA: "/app/top-data"
+    ports:
+      - "6278:6278"
+    volumes:
+      # Ech0 业务数据（数据库、上传文件）
+      - ech0-data:/app/data
+      # 置顶边车数据（pins.json）
+      - top-data:/app/top-data
+    restart: unless-stopped
+
+volumes:
+  ech0-data:
+  top-data:
