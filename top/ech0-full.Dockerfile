@@ -12,7 +12,7 @@ COPY web/ .
 RUN pnpm build
 
 # ---- 阶段 2：构建 Ech0 后端二进制 ----
-FROM golang:1.27.1-alpine AS backend-builder
+FROM golang:1.27.3-alpine AS backend-builder
 RUN sed -i 's|dl-cdn.alpinelinux.org|mirrors.aliyun.com|g' /etc/apk/repositories \
     && apk add --no-cache git ca-certificates gcc musl-dev sqlite-dev
 WORKDIR /app
@@ -26,7 +26,7 @@ RUN CGO_ENABLED=1 CGO_CFLAGS="-Du_int8_t=uint8_t -Du_int16_t=uint16_t -Du_int64_
     -o /out/ech0 ./cmd/ech0/main.go
 
 # ---- 阶段 3：构建 top 边车二进制（纯标准库，静态）----
-FROM golang:1.27.1-alpine AS top-builder
+FROM golang:1.27.3-alpine AS top-builder
 WORKDIR /src
 COPY top/ .
 RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/ech0-top .
