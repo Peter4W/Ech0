@@ -14,6 +14,7 @@
               :apply-title="t('commonUi.apply')"
               :cancel-title="t('commonUi.cancel')"
               :edit-title="t('commonUi.edit')"
+              :busy="saving"
               @apply="handleUpdateOAuth2Setting"
               @toggle="oauth2EditMode = !oauth2EditMode"
             />
@@ -459,6 +460,7 @@ const { getOAuth2Setting } = settingStore
 const { OAuth2Setting } = storeToRefs(settingStore)
 
 const oauth2EditMode = ref(false)
+const saving = ref(false)
 
 const OAuth2ProviderOptions = [
   { label: 'GitHub', value: OAuth2Provider.GITHUB },
@@ -482,6 +484,7 @@ const parseList = (input: string) =>
     .filter((s) => s.length > 0)
 
 const handleUpdateOAuth2Setting = async () => {
+  if (saving.value) return
   OAuth2Setting.value.scopes = scopeString.value.split(',').map((s) => s.trim())
   OAuth2Setting.value.redirect_uri =
     redirect_uri.value || `${window.location.origin}/oauth/${OAuth2Setting.value.provider}/callback`
@@ -497,6 +500,7 @@ const handleUpdateOAuth2Setting = async () => {
     return
   }
 
+  saving.value = true
   await fetchUpdateOAuth2Settings(OAuth2Setting.value)
     .then((res) => {
       if (res.code === 1) {
@@ -504,6 +508,7 @@ const handleUpdateOAuth2Setting = async () => {
       }
     })
     .finally(async () => {
+      saving.value = false
       oauth2EditMode.value = false
       await getOAuth2Setting()
       await refreshHealthCheck()

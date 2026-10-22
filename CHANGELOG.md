@@ -10,6 +10,41 @@ For releases prior to v4.6.5, see the [GitHub releases page](https://github.com/
 ## [Unreleased]
 
 
+## [5.8.2] - 2026-10-22
+
+### Added
+
+* **Ctrl+S / Cmd+S saves the panel you are editing.** An open inline edit in System, User, Storage, OAuth2, Passkey, Snapshot schedule, Webhooks, Copilot, Comments, or access-token creation is now saved with the shortcut. The apply button shows the key in its tooltip (⌘S on Apple platforms) and exposes `aria-keyshortcuts`, and the browser's own "Save page" dialog is suppressed only while an edit is active. The shortcut ignores key repeat, IME composition, and a save that is already running.
+
+### Fixed
+
+* **Double-saving a settings panel is no longer possible.** The save action is now blocked while its request is in flight, covering Copilot, System, User, Storage, OAuth2, Passkey, Snapshot schedule, Webhooks, Comments, and access-token creation. Previously a fast double click could send the same change twice.
+
+* **Comment settings cannot be saved before they load.** The save action stays disabled until the current settings have arrived, so opening the panel and saving immediately no longer writes defaults over the stored configuration.
+
+### Security
+
+* **Dependency refresh closes known advisories.** The Go backend and all three frontend projects were updated; there are no application code, API, schema, or configuration changes. On the backend, `golang.org/x/net` 0.61.0 fixes five HTTP/2 issues, and Go 1.27.3 fixes `GO-2026-6809` (`crypto/x509` distrust of compromised intermediate certificates, reachable through OAuth state verification). On the frontend, this resolves `shell-quote` command injection (critical, via `npm-run-all2`), a `markdown-it` quadratic-time DoS, the Vite 8.3.0–8.3.2 advisories, `@vitest/mocker` code injection, a `source-map-js` event-loop DoS, and a `compression` memory-leak DoS. `govulncheck ./...` reports no reachable vulnerabilities, and `pnpm audit` reports none for `site` and `hub`.
+
+* **One `web` advisory remains.** `braces` ([GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm)) is dev-only (eslint/stylelint globbing); `micromatch@4.0.8` accepts `^3.0.3`, but no patched release has been published.
+
+### Internal
+
+* **Go 1.27.3 is now required.** `go.mod`, the Docker builder image, CI workflows, and docs target Go 1.27.3.
+
+* **Backend modules updated.** `anthropic-sdk-go` 1.84.0, `openai-go/v3` 3.85.1, `quic-go` 0.64.1, the AWS SDK v2 chain, `go-sqlite3` 1.14.52, `gjson` 1.20.0, `mongo-driver/v2` 2.9.2, and OpenTelemetry 1.47.0.
+
+* **Frontend dependencies updated.** Web: Vue 3.5.44, Vue Router 5.4.0, Pinia 4.1.0, Vue I18n 11.4.16, VueUse 15.0.0, Vite 8.3.4, Vitest 4.1.12, markdown-it 15.0.3, UnoCSS 66.11.0, TypeScript 6.0.3. Site: React Router 8.5.0, React 19.3.1. Hub: Vite PWA plugin 2.0.0 and the same Vue stack. All three stay on TypeScript 6 because `vue-tsc` and `typescript-eslint` still reject TypeScript 7.
+
+* **`just hub build` works again.** The hub prebuild installs `web/` with pnpm instead of npm, whose dependency resolver crashed while walking pnpm's virtual store.
+
+* **Mockery pinned to 3.8.1.** Go 1.27's unified export data requires the newer tool; mocks were regenerated with no interface changes.
+
+* **Save shortcut coverage added.** Unit tests cover the composable's activation, busy, composition, and key-repeat handling, plus the capsule's tooltip and opt-out.
+
+* **Shortcut platform detection centralized.** `isMac` is now a shared helper used by both the filter badges and the capsule tooltips.
+
+
 ## [5.8.0] - 2026-09-28
 
 ### Changed

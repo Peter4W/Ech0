@@ -10,6 +10,7 @@
           :apply-title="t('commonUi.apply')"
           :cancel-title="t('commonUi.cancel')"
           :edit-title="t('commonUi.edit')"
+          :busy="saving"
           @apply="handleUpdatePasskeySetting"
           @toggle="passkeyEditMode = !passkeyEditMode"
         />
@@ -227,6 +228,7 @@ const busy = ref(false)
 const newDeviceName = ref<string>('My Passkey')
 const devices = ref<App.Api.Auth.PasskeyDevice[]>([])
 const passkeyEditMode = ref(false)
+const saving = ref(false)
 const passkeySetting = ref<App.Api.Setting.PasskeySetting>({
   webauthn_rp_id: '',
   webauthn_allowed_origins: [],
@@ -356,17 +358,24 @@ async function refreshHealthCheck() {
 }
 
 async function handleUpdatePasskeySetting() {
+  if (saving.value) return
   passkeySetting.value.webauthn_allowed_origins = parseList(webauthnOriginsString.value)
   if (passkeySetting.value.webauthn_allowed_origins.some((u) => !/^https?:\/\//.test(u))) {
     theToast.error(String(t('passkeySetting.originsMustBeHttp')))
     return
   }
-  const res = await fetchUpdatePasskeySettings(passkeySetting.value)
-  if (res.code === 1) {
-    theToast.success(res.msg)
-    passkeyEditMode.value = false
-    await getPasskeySetting()
-    await refreshHealthCheck()
+
+  saving.value = true
+  try {
+    const res = await fetchUpdatePasskeySettings(passkeySetting.value)
+    if (res.code === 1) {
+      theToast.success(res.msg)
+      passkeyEditMode.value = false
+      await getPasskeySetting()
+      await refreshHealthCheck()
+    }
+  } finally {
+    saving.value = false
   }
 }
 

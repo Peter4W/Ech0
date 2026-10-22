@@ -13,7 +13,7 @@ COPY web/ .
 
 RUN pnpm run build --mode production
 
-FROM golang:1.27.2-alpine AS backend-builder
+FROM golang:1.27.3-alpine AS backend-builder
 
 RUN sed -i 's|dl-cdn.alpinelinux.org|mirrors.aliyun.com|g' /etc/apk/repositories \
     && apk add --no-cache git ca-certificates gcc musl-dev sqlite-dev

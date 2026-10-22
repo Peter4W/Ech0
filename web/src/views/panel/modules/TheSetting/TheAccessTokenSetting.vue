@@ -13,6 +13,7 @@
             :apply-title="t('commonUi.done')"
             :cancel-title="t('commonUi.cancel')"
             :edit-title="t('commonUi.edit')"
+            :save-shortcut="false"
             @apply="accessTokenEdit = false"
             @toggle="accessTokenEdit = !accessTokenEdit"
           />
@@ -348,6 +349,7 @@ import { useSettingStore } from '@/stores'
 import { storeToRefs } from 'pinia'
 import { fetchCreateAccessToken, fetchDeleteAccessToken } from '@/service/api'
 import { useBaseDialog } from '@/composables/useBaseDialog'
+import { useSaveShortcut } from '@/composables/useSaveShortcut'
 import { theToast } from '@/utils/toast'
 import { AccessTokenExpiration } from '@/enums/enums'
 
@@ -633,6 +635,12 @@ const handleDeleteAccessToken = async (item: App.Api.Setting.AccessToken) => {
     },
   })
 }
+
+useSaveShortcut({
+  active: () => accessTokenEdit.value,
+  busy: () => isSubmitting.value,
+  onSave: () => void handleAddAccessToken(),
+})
 
 onMounted(async () => {
   await useSetting.getAllAccessTokens()

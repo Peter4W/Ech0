@@ -13,6 +13,7 @@
             :apply-title="t('commonUi.apply')"
             :cancel-title="t('commonUi.cancel')"
             :edit-title="t('commonUi.edit')"
+            :busy="saving"
             @apply="handleUpdateS3Setting"
             @toggle="storageEditMode = !storageEditMode"
           />
@@ -257,6 +258,7 @@ const { getS3Setting } = settingStore
 const { S3Setting } = storeToRefs(settingStore)
 
 const storageEditMode = ref<boolean>(false)
+const saving = ref<boolean>(false)
 
 const S3ServiceOptions = ref<{ label: string; value: S3Provider }[]>([
   { label: 'AWS', value: S3Provider.AWS },
@@ -266,6 +268,8 @@ const S3ServiceOptions = ref<{ label: string; value: S3Provider }[]>([
 ])
 
 const handleUpdateS3Setting = async () => {
+  if (saving.value) return
+  saving.value = true
   await fetchUpdateS3Settings(settingStore.S3Setting)
     .then((res) => {
       if (res.code === 1) {
@@ -273,6 +277,7 @@ const handleUpdateS3Setting = async () => {
       }
     })
     .finally(() => {
+      saving.value = false
       storageEditMode.value = false
       getS3Setting()
     })

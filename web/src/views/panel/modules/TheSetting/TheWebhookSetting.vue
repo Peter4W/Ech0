@@ -279,6 +279,7 @@ import InfoIcon from '@/components/icons/info.vue'
 import Trashbin from '@/components/icons/trashbin.vue'
 import PanelCard from '@/layout/PanelCard.vue'
 import { useBaseDialog } from '@/composables/useBaseDialog'
+import { useSaveShortcut } from '@/composables/useSaveShortcut'
 import { fetchCreateWebhook, fetchDeleteWebhook, fetchUpdateWebhook } from '@/service/api'
 import { useSettingStore } from '@/stores'
 import { theToast } from '@/utils/toast'
@@ -519,6 +520,12 @@ const statusClass = (status: string) => {
   if (status === 'failed') return 'status-failed'
   return 'status-unknown'
 }
+
+useSaveShortcut({
+  active: () => isFormOpen.value,
+  busy: () => formSubmitting.value,
+  onSave: () => void submitForm(),
+})
 
 onMounted(async () => {
   await refreshWebhooks()

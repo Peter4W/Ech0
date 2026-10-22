@@ -14,7 +14,7 @@ To keep collaboration smooth, please read this document and follow the conventio
 
 ### Backend
 
-- Go `1.27.2+`
+- Go `1.27.3+`
 - A working C toolchain (CGO is used, e.g. for SQLite)
 
 Common commands (repository root):

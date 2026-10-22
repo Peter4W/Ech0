@@ -51,6 +51,7 @@
           :apply-title="t('commonUi.apply')"
           :cancel-title="t('commonUi.cancel')"
           :edit-title="t('commonUi.edit')"
+          :busy="saving"
           @apply="handleApply"
           @toggle="activeEdit = !activeEdit"
         />
@@ -78,6 +79,7 @@ const tab = ref<'model' | 'embedding'>('model')
 
 const modelEdit = ref<boolean>(false)
 const embeddingEdit = ref<boolean>(false)
+const saving = ref<boolean>(false)
 
 const activeEdit = computed<boolean>({
   get: () => (tab.value === 'model' ? modelEdit.value : embeddingEdit.value),
@@ -91,9 +93,15 @@ const agentRef = ref<InstanceType<typeof TheAgentSetting> | null>(null)
 const embeddingRef = ref<InstanceType<typeof TheEmbeddingSetting> | null>(null)
 
 const handleApply = async () => {
-  const target = tab.value === 'model' ? agentRef.value : embeddingRef.value
-  await target?.save()
-  activeEdit.value = false
+  if (saving.value) return
+  saving.value = true
+  try {
+    const target = tab.value === 'model' ? agentRef.value : embeddingRef.value
+    await target?.save()
+    activeEdit.value = false
+  } finally {
+    saving.value = false
+  }
 }
 </script>
 

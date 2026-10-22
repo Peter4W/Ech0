@@ -16,6 +16,7 @@
         :apply-title="t('commonUi.apply')"
         :cancel-title="t('commonUi.cancel')"
         :edit-title="t('commonUi.edit')"
+        :busy="saving"
         @apply="handleUpdateSnapshotSchedule"
         @toggle="scheduleEditMode = !scheduleEditMode"
       />
@@ -103,6 +104,7 @@ const { getSnapshotSchedule, startSnapshotTask, restoreSnapshotTask } = settingS
 const { SnapshotSchedule, snapshotStatus, snapshotError, snapshotPhase } = storeToRefs(settingStore)
 
 const scheduleEditMode = ref<boolean>(false)
+const saving = ref<boolean>(false)
 const humanizedCron = computed(() => humanizeCron(SnapshotSchedule.value.cron_expression, t))
 
 const isCreating = computed(
@@ -157,13 +159,18 @@ watch(
 )
 
 const handleUpdateSnapshotSchedule = async () => {
-  const res = await fetchUpdateSnapshotScheduleSetting(SnapshotSchedule.value)
-  if (res.code === 1) {
-    theToast.success(res.msg)
+  if (saving.value) return
+  saving.value = true
+  try {
+    const res = await fetchUpdateSnapshotScheduleSetting(SnapshotSchedule.value)
+    if (res.code === 1) {
+      theToast.success(res.msg)
+    }
+  } finally {
+    saving.value = false
+    scheduleEditMode.value = false
+    await getSnapshotSchedule()
   }
-
-  scheduleEditMode.value = false
-  await getSnapshotSchedule()
 }
 
 onMounted(async () => {

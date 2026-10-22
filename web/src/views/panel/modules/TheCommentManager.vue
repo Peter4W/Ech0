@@ -18,7 +18,7 @@
           <BaseButton
             class="comment-btn comment-btn-primary whitespace-nowrap px-2.5 py-1 text-xs"
             @click="saveSetting"
-            :disabled="settingSaving"
+            :disabled="settingSaving || !settingLoaded"
           >
             {{ settingSaving ? t('common.saving') : t('common.save') }}
           </BaseButton>
@@ -362,6 +362,7 @@ import BaseSegmented from '@/components/common/BaseSegmented.vue'
 import BaseAvatar from '@/components/common/BaseAvatar.vue'
 import { theToast } from '@/utils/toast'
 import { formatDate } from '@/utils/other'
+import { useSaveShortcut } from '@/composables/useSaveShortcut'
 
 const router = useRouter()
 const { t } = useI18n()
@@ -387,6 +388,7 @@ const setting = reactive<App.Api.Comment.SystemSetting>({
   },
 })
 const settingSaving = ref(false)
+const settingLoaded = ref(false)
 const testingEmail = ref(false)
 
 const query = reactive<App.Api.Comment.PanelListQuery>({
@@ -446,6 +448,7 @@ const loadSetting = async () => {
       ...(res.data.email_notify || {}),
       smtp_password: '',
     }
+    settingLoaded.value = true
   }
 }
 
@@ -593,6 +596,12 @@ const hotClass = (hot: boolean) => {
   if (hot) return 'status-hot'
   return 'status-normal'
 }
+
+useSaveShortcut({
+  active: () => tab.value === 'setting' && settingLoaded.value,
+  busy: () => settingSaving.value,
+  onSave: () => void saveSetting(),
+})
 
 onMounted(async () => {
   await Promise.all([loadSetting(), loadList()])

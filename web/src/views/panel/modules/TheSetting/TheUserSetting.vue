@@ -13,6 +13,7 @@
             :apply-title="t('commonUi.apply')"
             :cancel-title="t('commonUi.cancel')"
             :edit-title="t('commonUi.edit')"
+            :busy="saving"
             @apply="handleUpdateUser"
             @toggle="editMode = !editMode"
           />
@@ -144,6 +145,7 @@ const userInfo = ref<App.Api.User.UserInfo>({
 })
 
 const editMode = ref<boolean>(false)
+const saving = ref<boolean>(false)
 const avatarSrc = computed(() => resolveAvatarUrl(user.value?.avatar))
 const localeOptions = LOCALE_OPTIONS
 const localeLabel = computed(
@@ -152,6 +154,8 @@ const localeLabel = computed(
 const { enqueueUpload, waitForTask, clearFinishedUploads } = useFileQueue()
 
 const handleUpdateUser = async () => {
+  if (saving.value) return
+  saving.value = true
   await fetchUpdateUser(userInfo.value)
     .then((res) => {
       if (res.code === 1) {
@@ -161,6 +165,7 @@ const handleUpdateUser = async () => {
       }
     })
     .finally(() => {
+      saving.value = false
       refreshCurrentUser()
     })
     .catch((err) => {

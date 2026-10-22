@@ -105,6 +105,7 @@ import { useI18n } from 'vue-i18n'
 import Close from '@/components/icons/close.vue'
 import Filter from '@/components/icons/filter.vue'
 import Chat from '@/components/icons/chat.vue'
+import { isMac } from '@/utils/platform'
 
 withDefaults(
   defineProps<{
@@ -149,8 +150,6 @@ const { t } = useI18n()
 
 const searchContent = ref<string>(searchValue.value)
 
-const isMac =
-  typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/.test(navigator.platform || '')
 const shortcutBadge = computed(() => (isMac ? '⌘K' : 'Ctrl+K'))
 
 const chatAvailable = computed(() => isLogin.value && AgentSetting.value.enable)
